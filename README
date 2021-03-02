@@ -1,0 +1,19 @@
+
+Geodimeter toolkit
+
+!!! WARNING !!!
+
+All tools in this repository are "as is". No warranty at all. You break your station you pay for repair.
+
+
+This project started as curiosity why can I turn on this cheap 5500 station that i bought on internet. Lead to spending 4-5 months disassembling multiple firmwares from multiple stations. This all is work in progress, still evolving, still improving.
+
+Tools available now:
+
+docu - contains various documentation for Geodimeter totalstations 400/500/4000/600
+gdm600 - tools for geodimeter 600
+gdm-iface - interface to communicate with 400/500/4000 series of stations
+
+
+
+If you find problem, or have some more information, or have fix for some tool use github's issue tracking system.
