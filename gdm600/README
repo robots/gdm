@@ -1,0 +1,40 @@
+Tools to backup and restore GDM600 firmware
+-------------------------------------------
+
+
+Backup:
+
+python backupfirmware.py file port
+
+this will talk to station on "port" and save firmware into file "file"
+
+port needs to be "COMx" on windows, and "/dev/ttyxxx" on linux.
+
+resulting file will be in motorola hex format
+
+
+Restore:
+
+python upload.py file port
+
+parameters are same as above
+
+uploads "file" into station on "port". File needs to be in format as above tool outputs it.
+
+
+
+Some stations don't support dumping of firmware through serial port from firmware - older PVX board. (software 628-07.06 and older). In this case you need to use "pencil trick" and OV* command.
+
+
+Pencil trick:
+
+During booting rom checks checksum of the firmware in ram, if the check is ok it executes the firmwar. If check is bad, loader code is entered. This code lets you update content of ram.
+
+You need to find 74HC573 chip on the board. During boot touch inputs of this chip using very blunt pencil - short data pins. This will cause the checksum to be temporarily corrupt and boot code will enter loader.
+
+Loader has several commands - few very dangerous at this point. OV* is the most interesting one. Start terminal emulator (realterm, teraterm) enable output capture and execute OV* command.
+
+
+dump2srec.py will help you to convert this dump into file that can be loaded by upload.py
+
+It has not been tested on this type of stations.

@@ -1,0 +1,61 @@
+GDM-If - geodimeter 400/500/4000 interface tool
+-----------------------------------------------
+
+This directory contains sources for stm32 bluepill board. There
+are 3 projects:
+
+- gdm-iface - interface to communicate with 400/500/4400 series
+              geodimeter stations
+
+- gdm-fakeedm - fake edm for 400/500 station - my broke during
+              R&D and this was replacement. It was tested
+              with 400 station. Returns fake 1234.000m distance
+
+- gdm-edmemul - take on edm mcu emulation using bluepull, never
+                actually tested as stm32 is 3v3volt and original
+                mcu is 5v.
+
+building sources:
+-----------------
+download recent gnuarm toolchain, install, put into PATH.
+
+in fw directory type:
+
+make
+
+firmware will be in FLASH_RUN/ directory.
+
+use openocd to flash, scripts are provided.
+
+If you want to build bin. Type:
+
+make bin
+
+bin will be in the same output directory.
+
+interface how to:
+-----------------
+
+for interface you need:
+1x bluepill - original stm32f103 based! not chineese clone
+1x TXS0108 breakout board - or similar, need 3 channels, but 8channels are available for fewer $
+1x 10uF capacitor (>6.3V)
+1x DB9 connector
+cables
+
+5V and 3v3 from bluepill to translator board
+10uF capacitor on 5V side of translator board
+OE pin to 3v3
+
+pin PB12 (IO1) to txs0108 channel x VCCa side
+pin PB13 (IO2) to txs0108 channel y VCCa side
+pin PB14 (IO3) to txs0108 channel y VCCa side
+
+DB9 pin 7  to IO1 VCCb side
+DB9 pin 1  to IO2 VCCb side
+DB9 pin 5  to IO3 VCCb side
+DB9 pin 4  gnd on translator board
+DB9 pin 6  power +
+DB9 pin 9  power -
+
+Keep cables short < 20cm

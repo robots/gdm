@@ -1,0 +1,79 @@
+
+def at_exit
+
+end
+
+def step_up
+  pwm 1 2000
+  sleep 0.3
+  pwm 2 4000
+  sleep 0.3
+  pwm 1 4000
+  sleep 0.3
+  pwm 2 2000
+  sleep 0.3
+end
+
+def step_down
+  pwm 1 2000
+  sleep 0.3
+  pwm 2 2000
+  sleep 0.3
+  pwm 1 4000
+  sleep 0.3
+  pwm 2 4000
+  sleep 0.3
+end
+
+def debug_proc
+  wlab 163 34832
+end
+
+def debug
+  wlab 149 3
+end
+
+def mygdm
+  gdm 442
+  gdm_load_defaults
+
+  wlab 78 1.8.0.9600
+  wlab 134 0
+  wlab 149 2
+
+  wlab 112 0
+  # temp press offset
+  wlab 56 22.0
+  wlab 74 1000.0
+  wlab 20 0.0
+  #wlab 0 nieco
+  #wlab 1 nieco
+  #wlab 2 nieco
+
+  wlab 155 400
+  wlab 156 Helloworld
+
+  # compensator
+  wlab 104 1
+  wlab 106 1
+
+
+  # enable all programs
+  gdm_lic 101
+
+  gdm_load_label_names 400_labels
+  gdm_timedate
+  #dm_texts 400_text1 400_text2
+  gdm_load_angle angleall0 angleall0
+
+end
+
+# large timeout, fast transfer
+set_timing 5000 5 10
+# slow transfer for unreliable connection
+#set_timing 5000 200 10
+
+#wlab 160 b'\x00\x00\x60\x60'
+gdm 442
+
+

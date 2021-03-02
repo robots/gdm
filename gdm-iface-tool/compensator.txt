@@ -1,0 +1,27 @@
+
+
+#compensator:
+labels 104, 106, 109, 107, 108
+
+104 and 106 are gains of axis 1 and 2
+107 and 107 are offsets - calculated during "comp init"
+
+109 is cross parameter (rotation of compensator ?)
+
+compinit labels: 167,168,169,138
+
+167 number of avg rounds
+
+168 and 169 are accumlators of the axis 1 and 2
+
+during init stage they compensator value is sampled "label 167" times.
+
+Max and min of each axis is stored
+
+during evaluation followin must hold:
+
+(max-min) * gain < "label 138"
+
+(acc / "label 167") * gain < 0.10
+
+

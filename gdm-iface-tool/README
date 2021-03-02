@@ -1,0 +1,40 @@
+
+bla bla
+
+you need inferface - blue pill
+
+bla bla
+
+tool
+------
+
+command line:
+--port x - port where interface is
+--script - execute script and exit (see interactive)
+
+
+command line interface uses readline input library, you can use arrows to edit, all history is saved upon normal exit.
+
+commands:
+exit
+sleep x - sleep for x seconds, can be decimal
+run file - run commands from file
+interactive - enables interactive mode from script, after finish, command line will appear
+
+iface commands:
+id - get hw/sw id
+ping - ping hw
+selftest - selftest iopins, test short
+set_timing timeout bitdelay bitdebounce - timeout (in ms) to wait for other side to respond, bitdelay(us) how many us to wait after bit set, bit read, bitdebounce - how many times does state have to be still to be taken as correct
+recv - read data from gdm
+send x b - write data to gdm, label x (int) with data b (python bytes b'xxx')
+wmem seg:addr data - write mem address (hexadecimal) with data (python bytes)
+wmem_file seg:addr file - same as before but data from file
+
+gdm specific:
+gdm x - selects GDM specific interface (442, ...)
+gdm_load_angle file1 file2
+gdm_load_edm file
+gdm_load_label_names file
+gdm_lic x
+
