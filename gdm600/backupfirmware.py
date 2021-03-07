@@ -13,7 +13,7 @@ if len(sys.argv) > 2:
     firmwareoutput = sys.argv[2]
 
 mem_main = bytearray(b'\x00' * (0x8000))
-bank = -1
+bank = 0
 banks = []
 
 for i in range(0,8):
