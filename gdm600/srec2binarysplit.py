@@ -36,10 +36,10 @@ with open(sys.argv[1], "rt") as fin:
         else:
             raise Exception("unsupported record")
 
-        print(len(l), l)
-        print("data %d '%s' "%(len(l[idx:idx+(length-1)*2]),l[idx:idx+(length-1)*2]))
+        #print(len(l), l)
+        #print("data %d '%s' "%(len(l[idx:idx+(length-1)*2]),l[idx:idx+(length-1)*2]))
         data = binascii.unhexlify(l[idx:idx+(length-1)*2])
-        print("bank %d addr %x" % (bank, addr))
+        #print("bank %d addr %x" % (bank, addr))
 
         if bank > 0:
             for i in range(len(data)):
@@ -57,7 +57,7 @@ with open("mainmem.bin", "wb") as fout:
 with open("maincode.bin", "wb") as fout:
     fout.write(mem_main[0x2000:])
 
-for i in range(0,8):
+for i in range(1,8):
     with open("bank%d.bin" % i, "wb") as fout:
         fout.write(banks[i])
 
