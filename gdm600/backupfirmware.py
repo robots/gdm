@@ -4,13 +4,13 @@ import time
 import sys
 import re
 
+serport = "COM5"
 firmwareoutput = "fw.s"
-if len(sys.argv) > 1:
-    firmwareoutput = sys.argv[1]
 
-serialport = "/dev/ttyUSB0"
+if len(sys.argv) > 1:
+    serport = sys.argv[1]
 if len(sys.argv) > 2:
-    serialport = sys.argv[2]
+    firmwareoutput = sys.argv[2]
 
 mem_main = bytearray(b'\x00' * (0x8000))
 bank = -1
@@ -56,7 +56,7 @@ def srec(t, a, d = None):
         chksum += (a >> 16) & 0xff
         chksum += (a >> 8) & 0xff
         chksum += (a) & 0xff
-    
+
     if t in [1,2]:
 #        print(l, repr(d))
         for i in range(len(d)):
@@ -69,7 +69,7 @@ def srec(t, a, d = None):
 
     chksum = 0xff - (chksum & 0xff)
     out += "%02X" % chksum
-   
+
     return out
 
 def gdm_send(cmd):
@@ -108,7 +108,7 @@ def gdm_read(cmd, label):
     return val
 
 
-ser = serial.Serial(serialport, 9600, timeout = 1, rtscts=0, dsrdtr=0)
+ser = serial.Serial(serport, 9600, timeout = 1, rtscts=0, dsrdtr=0)
 
 seed = gdm_read('G', 127)
 seed = int(seed)
@@ -169,15 +169,15 @@ if True:
 
 print("Readout done. Saving to firmware to ", firmwareoutput)
 
-with open(firmwareoutput, "wb") as fout:
+with open(firmwareoutput, "wt") as fout:
     for i in range(0x20, 0x8000, 16):
         data = mem_main[i:i+16]
         if sum(data) == 0:
             continue
         s = srec(1, i, data)
 #        print("%x" % i, s)
-        fout.write(s.encode('ascii'))
-        fout.write(b'\r\n')
+        fout.write(s)
+        fout.write('\n')
 
     for b in range(1,8):
         for i in range(0, 0x8000, 16):
@@ -187,12 +187,12 @@ with open(firmwareoutput, "wb") as fout:
                 continue
             s = srec(2, addr, data)
 #            print("%x" % addr, s)
-            fout.write(s.encode('ascii'))
-            fout.write(b'\r\n')
+            fout.write(s)
+            fout.write('\n')
 
     s = srec(9, 0)
 #    print("%X" % addr, s)
-    fout.write(s.encode('ascii'))
-    fout.write(b'\r\n')
+    fout.write(s)
+    fout.write('\n')
 
 response = gdm_write('G', 127, key+1)
