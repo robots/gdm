@@ -3,9 +3,9 @@ import serial
 import time
 import sys
 
-firmwareoutput = "fw.s"
+firmwarefile = "fw.s"
 if len(sys.argv) > 1:
-    firmwareoutput = sys.argv[1]
+    firmwarefile = sys.argv[1]
 
 serialport = "/dev/ttyUSB0"
 if len(sys.argv) > 2:
