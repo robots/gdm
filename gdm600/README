@@ -1,6 +1,8 @@
 Tools to backup and restore GDM600 firmware
 -------------------------------------------
 
+For these tools you need python3 installed.
+
 
 Backup:
 
