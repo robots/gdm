@@ -25,7 +25,7 @@ uploads "file" into station on "port". File needs to be in format as above tool 
 
 
 
-Some stations don't support dumping of firmware through serial port from firmware - older PVX board. (software 628-07.06 and older). In this case you need to use "pencil trick" and OV* command.
+Some stations don't support dumping of firmware through serial port from firmware - older PVX board. (software 628-07.06 and before). In this case you need to use "pencil trick" and OV* command.
 
 
 Pencil trick:
