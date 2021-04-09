@@ -292,7 +292,7 @@ class GDMIf(threading.Thread):
         dat = self._transfer(self.CMD_RECV)
 
         if isinstance(dat, bool):
-            raise Exception("timeout sending")
+            raise Exception("timeout receiving")
             #return 0xffff, None, None
 
         ret, label = struct.unpack("<IB", dat[:5])

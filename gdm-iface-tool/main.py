@@ -178,7 +178,7 @@ class InputThread(threading.Thread):
                 print("bad")
         elif cmd[0] == 'recv':
             ret = self.gdmif.recv()
-            if ret[0] == True:
+            if ret[0] == 0:
                 print("ok, lab: %d data: %s" % (ret[1], ret[2].hex()))
             else:
                 print("bad %04x" % ret[0])
