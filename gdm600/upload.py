@@ -15,6 +15,7 @@ ser = serial.Serial(serialport, 9600, timeout = 10, rtscts=0, dsrdtr=0)
 
 #ser.write("?\r".encode('ascii'))
 ser.write("LV=0\r".encode('ascii'))
+print("sending erase command, wait ...")
 
 time.sleep(1)
 ser.baudrate = 38400
@@ -27,13 +28,19 @@ print(l)
 if not l == b'*':
     print("no")
 
+num_lines = sum(1 for line in open(firmwarefile, "rt"))
+cur_line = 0
+
 with open(firmwarefile, "rt") as fin:
     while True:
         l = fin.readline()
         if len(l) == 0:
             break
 
-        print(l)
+        cur_line += 1
+        sys.stdout.write("\rWriting %d%% %d/%d" % (int(cur_line*100/num_lines), cur_line, num_lines))
+        sys.stdout.flush()
+#        print(l)
 
 #        for i in range(len(l)):
 #            ser.write(l[i].encode('ascii'))
@@ -52,6 +59,6 @@ ser.baudrate = 9600
 
 l = ser.readline()
 if len(l) == 0:
-    print("bad")
+#    print("bad")
     sys.exit(0)
 
