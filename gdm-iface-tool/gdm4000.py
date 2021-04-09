@@ -1,8 +1,8 @@
 
-import gdm442
+import gdm400
 import struct
 
-class GDM4400(gdm442.GDM442):
+class GDM4000(gdm400.GDM400):
     labels = {
         0: (5, '  Info', None, '0'),
         1: (5, '  Data', None, '0'),

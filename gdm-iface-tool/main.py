@@ -14,8 +14,8 @@ import math
 
 from gdmif import GDMIf
 from gdm import GDM
-from gdm442 import GDM442
-from gdm4400 import GDM4400
+from gdm400 import GDM400
+from gdm4000 import GDM4000
 
 import readline
 import argparse
@@ -35,8 +35,8 @@ workFlag = True
 ##crcfn = crcmod.predefined.mkPredefinedCrcFun('crc-32-mpeg')
 
 gdms = {
-    "442": GDM442,
-    "4400": GDM4400,
+    "400": GDM400,
+    "4000": GDM4000,
 }
 
 def my_print(text):

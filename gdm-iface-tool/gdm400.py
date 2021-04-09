@@ -10,7 +10,7 @@ from gdm_num import gdm_num
 
 
 
-class GDM442(gdm.GDM):
+class GDM400(gdm.GDM):
     labels = {
         0: (5, '  Info', None, '0'),
         1: (5, '  Data', None, '0'),
@@ -195,10 +195,6 @@ class GDM442(gdm.GDM):
     def __init__(self, gdmif, verbose=True):
         super().__init__(gdmif, verbose)
 
-        for l,v in self.labels.items():
-            if not len(v) == 4:
-                raise Exception("fix table", l)
-
     def load_label_names(self, label_names):
         if not len(label_names) == self.label_name_size:
             raise Exception("label names need " + str(self.label_name_size) + " bytes")
@@ -285,19 +281,19 @@ class GDM442(gdm.GDM):
             a=bytearray()
 
             for x in cal[0]:
-                print(x)
+#                print(x)
                 a += gdm_num.to_6num(x)
 
             for y in cal[1]:
-                print(y)
+#                print(y)
                 a += gdm_num.to_6num(y)
 
             for row in cal[2]:
-                print(1/row[0])
+#                print(1/row[0])
                 a+= gdm_num.to_6num(1/row[0])
-                print(row[1])
+#                print(row[1])
                 a+= gdm_num.to_6num(row[1])
-                print(row[2])
+#                print(row[2])
                 a+= gdm_num.to_6num(row[2])
             b.append(a)
 

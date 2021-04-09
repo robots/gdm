@@ -62,6 +62,11 @@ class GDM:
         self.gdmif = gdmif
         self.verbose = verbose
 
+        for l,v in self.labels.items():
+            if not len(v) == 4:
+                raise Exception("fix label table", l)
+
+
     def get_type(self, label):
         if label not in self.labels.keys():
             raise Exception("no such label")

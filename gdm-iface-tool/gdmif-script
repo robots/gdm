@@ -34,7 +34,7 @@ def debug
 end
 
 def mygdm
-  gdm 442
+  gdm 400
   gdm_load_defaults
 
   wlab 78 1.8.0.9600
@@ -74,6 +74,6 @@ set_timing 5000 5 10
 #set_timing 5000 200 10
 
 #wlab 160 b'\x00\x00\x60\x60'
-gdm 442
+gdm 400
 
 
