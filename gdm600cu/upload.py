@@ -106,16 +106,24 @@ ser.write(key.encode('ascii'))
 def eff_addr(seg, addr):
     return (seg << 4) + addr
 
+if not ser.read(1) == b'>':
+    print("bad, retry")
+    sys.exit(0)
+
+
+with open(firmwarefile, "rb") as fin:
+    fin.seek(0, os.SEEK_END)
+    file_size = fin.tell()
+#    fin.seek(0, os.SEEK_SET)
+
+    print("Selected file ", firmwarefile, " size = ", file_size, "bytes")
+
 input("Select 2. IHloader 115200 on CU, and press enter here when ready")
 
 ser.baudrate = 115200
 time_start = time.time()
 
 with open(firmwarefile, "rb") as fin:
-    fin.seek(0, os.SEEK_END)
-    file_size = fin.tell()
-    fin.seek(0, os.SEEK_SET)
-
     seg = 0
     addr = 0
 
@@ -138,8 +146,14 @@ with open(firmwarefile, "rb") as fin:
             time.sleep(0.01)
 
         
-        # skip rom working space :-)
         ea = eff_addr(seg, addr)
+
+        # if we get to ROM boundary, end
+        if ea >= 0xf0000:
+            print("\nSkipping ROM address space")
+            break
+
+        # skip rom working space :-)
         if not (ea >= 0x7000 and ea <= 0x9000):
             send_data(ser, addr, data)
             time.sleep(0.001)
@@ -155,6 +169,7 @@ with open(firmwarefile, "rb") as fin:
 #        break
 
 
+
     send_eof(ser)
 
-print("Time: %.2f sec" % (time.time()-time_start))
+print("\n\nTime: %.2f sec" % (time.time()-time_start))
