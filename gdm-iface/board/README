@@ -1,0 +1,29 @@
+
+WIP project of multi interface board. This board contains:
+
+connector for 400/500/4000 stations
+external serial connector
+level translators 3v to 5v
+dcdc converter for powering mcu
+radio
+max232
+stm32 bluepill
+-12V dc dc (optional, for angular board interfacing)
+
+
+Aim of this board is:
+
+- interface for programming of 400/500/4000 stations with serial communication - this is working!
+- radio interface for gdm600 station - not implemented in firmware
+- radio interface for computer - counterpart to upper radio - not implemented
+- direct interface to gdm boards - angle/servo - needs firmware modification
+- 4x servo output - used for 400station calibration - working, needs better software for calibration calculation.
+
+
+
+
+Notes on build:
+
+-when mounting dc dc converter board be sure to use diode as one "leg" (on output "+" signal). This will prevent 5v going from usb to dcdc converter
+-be sure to use genuine STM32 bluepill - some bluepills use different mcu that contains different USB peripheral - not working with our firmware.
+-set dc dc to 5.0volts (+diode forward voltage) before plugging in bluepill and level translators. This will prevent from frying them.
