@@ -51,13 +51,6 @@ uint32_t cmd_in_state = CMD_IN_IDLE;
 struct fifo_t cmd_prio_fifo;
 uint8_t cmd_prio_buf[CMD_PRIO_BUF_LEN];
 
-#if 0
-uint8_t test_label;
-uint8_t test_buf[200];
-uint8_t test_len;
-#endif
-
-
 struct {
 	uint8_t id;
 	int8_t params;
@@ -335,64 +328,8 @@ static int cmd_handle_pwm(void)
 	return 2;
 }
 
-#if 0
-static int test(void)
-{
-	int ret;
-
-	test_label = 155;
-	test_buf[0] = '1';
-	test_buf[1] = '2';
-	test_buf[2] = '3';
-	test_buf[3] = '4';
-	test_len = 4;
-
-/*
-	test_label = 135;
-	test_buf[0] = 0x82;
-	test_buf[1] = 0x1e;
-	test_buf[2] = 0x00;
-	test_buf[3] = 0x00;
-	test_buf[4] = '1';
-	test_buf[5] = '2';
-	test_buf[6] = '3';
-	test_buf[7] = '4';
-	test_len = 8;
-*/
-	ret = gdm_send_pkt(test_label, test_buf, test_len);
-	if (ret) {
-		return ret+0x2000;
-	}
-/*
-	test_label = 156;
-	test_buf[0] = 'H';
-	test_buf[1] = 'e';
-	test_buf[2] = 'l';
-	test_buf[3] = 'l';
-	test_buf[4] = 'o';
-	test_len = 5;
-*/
-	test_label = 253;
-	test_buf[0] = 155;
-	test_len = 1;
-	ret = gdm_send_pkt(test_label, test_buf, test_len);
-	if (ret) {
-		return ret+0x3000;
-	}
-
-	test_len = sizeof(test_buf);
-	ret = gdm_recv_pkt(&test_label, test_buf, &test_len);
-	if (ret) {
-		return ret+0x4000;
-	}
-	return ret;
-}
-#endif
 static int cmd_handle_mode(void)
 {
-#if 0
-	test();
-#endif
 	gdm_set_mode(cmd_in_pkt.data[0]);
 	return 1;
 }
