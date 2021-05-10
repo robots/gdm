@@ -28,7 +28,7 @@ ifeq ($(M), blue)
 BOARD    = blue
 TARGET   = blue
 FAMILY   = STM32F1
-CHIP     = STM32F103x6
+CHIP     = STM32F103xB
 F_XTAL   = 8000000
 LINKERSCRIPTPATH = ../lib/gcc
 endif
@@ -74,8 +74,9 @@ BSP = ../bsp/$(BOARD)
 # use file-extension c for "c-only"-files
 
 ## Application:
-SRC = main.c  #stm32f10x_gpio.c
+SRC = main.c
 SRC += usb_uart_cdc.c cmd.c gdm.c pwm.c
+SRC += ub.c
 SRC += syscall.c
 
 SRC += ../common/delay.c
@@ -85,8 +86,11 @@ SRC += ../common/gpio.c
 SRC += ../common/led.c
 SRC += ../common/systime.c
 SRC += ../common/timer.c
+#SRC += ../common/uart1.c
+SRC += ../common/uart3.c
 
 SRC += $(BSP)/bsp_led.c
+SRC += $(BSP)/bsp_uart.c
 
 SRC += $(LIBUSBSTM32DIR)/src/usbd_core.c
 SRC += $(LIBUSBSTM32DIR)/src/usbd_stm32f103_devfs.c

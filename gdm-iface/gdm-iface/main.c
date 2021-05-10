@@ -5,6 +5,8 @@
 #include "led.h"
 
 #include "cmd.h"
+#include "ub.h"
+#include "usb_uart_cdc.h"
 
 const struct gpio_init_table_t main_gpio[] = {
 	{
@@ -36,8 +38,10 @@ int main(void)
 	systime_init();
 	led_init();
 
+	usb_uart_cdc_init();
 
 	cmd_init();
+	ub_init();
 
 	led_set(0, LED_3BLINK);	
 	
@@ -45,5 +49,6 @@ int main(void)
 		systime_periodic();
 		led_periodic();
 		cmd_periodic();
+		ub_periodic();
 	}
 } 

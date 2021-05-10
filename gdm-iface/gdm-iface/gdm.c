@@ -1,4 +1,7 @@
 
+// iface 1: PB12, PB13, PB14
+// iface 2: PB8, PB15, PA8
+
 #include "platform.h"
 #include "systime.h"
 #include "gpio.h"
@@ -18,24 +21,16 @@
 #define IO1_PIN    12
 #define IO2_PIN    13
 #define IO3_PIN    14
+
 #define IOx_STATE(x) (!!(GPIOB->IDR & (1<<(x))))
-//#define IO_DELAY 50
-#define IO_DELAY gdm_bitdly
 
-#define IO1_SET_1  GPIOB->BSRR = (1 << 12); delay_us(IO_DELAY);
-#define IO1_SET_0  GPIOB->BRR = (1 << 12);  delay_us(IO_DELAY);
-#define IO2_SET_1  GPIOB->BSRR = (1 << 13); delay_us(IO_DELAY);
-#define IO2_SET_0  GPIOB->BRR = (1 << 13);  delay_us(IO_DELAY);
-#define IO3_SET_1  GPIOB->BSRR = (1 << 14); delay_us(IO_DELAY);
-#define IO3_SET_0  GPIOB->BRR = (1 << 14);  delay_us(IO_DELAY);
+#define IO1_SET_1  GPIOB->BSRR = (1 << 12); delay_us(gdm_bitdly);
+#define IO1_SET_0  GPIOB->BRR = (1 << 12);  delay_us(gdm_bitdly);
+#define IO2_SET_1  GPIOB->BSRR = (1 << 13); delay_us(gdm_bitdly);
+#define IO2_SET_0  GPIOB->BRR = (1 << 13);  delay_us(gdm_bitdly);
+#define IO3_SET_1  GPIOB->BSRR = (1 << 14); delay_us(gdm_bitdly);
+#define IO3_SET_0  GPIOB->BRR = (1 << 14);  delay_us(gdm_bitdly);
 
-
-// 50*100ms
-#define GDM_TIMEOUT_VAL gdm_timeout
-//#define GDM_TIMEOUT_VAL 1000
-
-//#define GDM_DEB_CYCLES 3
-#define GDM_DEB_CYCLES gdm_debounce
 
 int gdm_mode = 0;
 uint16_t gdm_bitdly = 50;
@@ -77,7 +72,6 @@ void gdm_init(void)
 	IO1_SET_1;
 	IO2_SET_1;
 	IO3_SET_1;
-
 }
 
 void gdm_periodic(void)
@@ -171,16 +165,16 @@ static int wait_state(int pin, uint16_t state)
 	t = systime_get();
 	deb = 0;
 	while(1) {
-		delay_us(IO_DELAY);
+		delay_us(gdm_bitdly);
 		if (IOx_STATE(pin) == state) {
 			deb++;
-			if (deb > GDM_DEB_CYCLES) {
+			if (deb > gdm_debounce) {
 				break;
 			}
 		} else {
 			deb = 0;
 		}
-		if (systime_get()-t > GDM_TIMEOUT_VAL) {
+		if (systime_get()-t > gdm_timeout) {
 			return 1;
 		}
 	}
@@ -214,13 +208,11 @@ int gdm_send_start()
 		}
 	}
 
-
 	IO3_INPUT;
 
 	led_toggle(0);
 
 	return ret;
-
 }
 
 static int send_bit(uint8_t b, uint8_t *p)
@@ -345,24 +337,19 @@ int gdm_recv_byte(uint8_t *b, uint8_t *p)
 	}
 
 	return ret;
-
 }
 
 static int send_ack(uint8_t *ack, uint8_t *p)
 {
 	int ret = 0;
 	uint8_t b;
-	// dummy parity
-	uint8_t pp;
+	uint8_t pp; // dummy parity
 
-//	*p = *p ^ 1;
 	ret = send_bit(*p, &pp);
 	if (ret != 0) {
 		return 0x10 + ret;
 	}
 
-//	ret = send_bit(*p, &pp);
-//return 0x4000;
 	ret = recv_bit(ack, &pp);
 	if (ret != 0) {
 		return 0x20 + ret;

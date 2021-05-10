@@ -69,13 +69,13 @@ struct {
 
 void cmd_periodic(void)
 {
-	if (!FIFO_EMPTY(&usb_rx_fifo)) {
+	if (!FIFO_EMPTY(&usb_rx1_fifo)) {
 		uint8_t *b;
-		b = fifo_get_read_addr(&usb_rx_fifo);
+		b = fifo_get_read_addr(&usb_rx1_fifo);
 
 		cmd_parse(*b);
 
-		fifo_read_done(&usb_rx_fifo);
+		fifo_read_done(&usb_rx1_fifo);
 	}
 
 	// copy prio fifo to uart
@@ -87,14 +87,14 @@ void cmd_periodic(void)
 		// hackhish access to fifo
 		if (f->write > f->read) {
 			rl = f->write - f->read;
-			usb_uart_cdc_send(fifo_get_read_addr(f), rl);
+			usb_uart_cdc1_send(fifo_get_read_addr(f), rl);
 			totlen += rl;
 		} else if (f->read > f->write) {
 			rl = f->e_num - f->read;
-			usb_uart_cdc_send(fifo_get_read_addr(f), rl);
+			usb_uart_cdc1_send(fifo_get_read_addr(f), rl);
 			totlen += rl;
 			rl = f->write;
-			usb_uart_cdc_send(f->buffer, rl);
+			usb_uart_cdc1_send(f->buffer, rl);
 			totlen += rl;
 		}
 
@@ -107,8 +107,6 @@ void cmd_periodic(void)
 
 void cmd_init(void)
 {
-	usb_uart_cdc_init();
-
 	fifo_init(&cmd_prio_fifo, cmd_prio_buf, sizeof(uint8_t), CMD_PRIO_BUF_LEN);
 
 	timer_init(TIMER_TIM3);
@@ -220,7 +218,7 @@ void cmd_send(void)
 
 	cmd_out_pkt.crc = __REV(c);
 	
-	usb_uart_cdc_pkt(&cmd_out_pkt);
+	usb_uart_cdc1_pkt(&cmd_out_pkt);
 
 	memset(&cmd_out_pkt, 0, sizeof(struct cmd_pkt_t));
 }
@@ -371,7 +369,6 @@ static int cmd_handle_recv(void)
 	cmd_out_pkt.len = l+5;
 	memcpy(&cmd_out_pkt.data[0], &ret, 4);
 	cmd_out_pkt.data[4] = label;
-
 
 	return 1;
 }
