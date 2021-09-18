@@ -1,0 +1,27 @@
+These files are scans of old Geodimeter folders.
+
+4 folders have been scanned:
+geodimeter-adjustment.pdf
+geodimeter-techmemos.pdf
+geodimeter-workshopinfo.pdf
+geodimeter600-tracker.pdf
+
+Out of these PDFs I have extracted some info for easier finding:
+
+Geodimeter 400-500-4000-600 labels.pdf - description of labels for 400/500/4000 systems
+Geodimeter 400-500-4000-600 errors.pdf - description of station errors
+
+Geodumeter 600 labels.pdf - label system description - see notes below
+
+Geodimeter 220 manual.pdf - some manual pages for Geodimeter 220/216
+
+
+
+Notes on board names:
+MAP - control unit
+PVX - station mainboard
+POA - angular readout unit and compensator
+DDC - laser distance unit
+GDM - "geodimeter total station"
+SRV - servoboard
+TAC - tracker unit
