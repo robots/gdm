@@ -79,9 +79,9 @@ void gpio_init(const struct gpio_init_table_t *t, int num)
 				cr |= mode << (4*pos);
 
 				if (t[i].mode == GPIO_MODE_IPD) {
-          t[i].gpio->BRR = 0x01 << pos;
+					t[i].gpio->BRR = 0x01 << pos;
 				} else if (t[i].mode == GPIO_MODE_IPU) {
-          t[i].gpio->BSRR = 0x01 << pos;
+					t[i].gpio->BSRR = 0x01 << pos;
 				}
 			}
 
@@ -103,9 +103,9 @@ void gpio_init(const struct gpio_init_table_t *t, int num)
 				cr |= mode << (4*pos);
 
 				if (t[i].mode == GPIO_MODE_IPD) {
-          t[i].gpio->BRR = 0x01 << pos;
+					t[i].gpio->BRR = 0x01 << pos;
 				} else if (t[i].mode == GPIO_MODE_IPU) {
-          t[i].gpio->BSRR = 0x01 << pos;
+					t[i].gpio->BSRR = 0x01 << pos;
 				}
 			}
 
