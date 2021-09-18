@@ -14,6 +14,7 @@ import math
 
 from gdmif import GDMIf
 from gdm import GDM
+from gdm220 import GDM220
 from gdm400 import GDM400
 from gdm4000 import GDM4000
 
@@ -35,6 +36,7 @@ workFlag = True
 ##crcfn = crcmod.predefined.mkPredefinedCrcFun('crc-32-mpeg')
 
 gdms = {
+    "220": GDM220,
     "400": GDM400,
     "4000": GDM4000,
 }
