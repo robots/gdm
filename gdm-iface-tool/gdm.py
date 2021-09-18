@@ -158,7 +158,7 @@ class GDM:
 #            print("addr: %x" % addr, "param %x" % param[0])
             p = param[0] & 7
 
-            adat = bytearray(data)
+            #adat = bytearray(data)
             raw = from_bcd(data)
 
 #            print("lab", label, "decmials:", p, "data:", data.hex())
