@@ -77,8 +77,8 @@ static const struct usb_device_descriptor device_desc = {
     .bDeviceSubClass    = USB_SUBCLASS_IAD,
     .bDeviceProtocol    = USB_PROTO_IAD,
     .bMaxPacketSize0    = CDC_EP0_SIZE,
-    .idVendor           = 0x0483,
-    .idProduct          = 0x5740,
+    .idVendor           = 0x1209,
+    .idProduct          = 0x2060,
     .bcdDevice          = VERSION_BCD(1,0,0),
     .iManufacturer      = 1,
     .iProduct           = 2,
@@ -267,8 +267,8 @@ static const struct cdc_config config_desc = {
 };
 
 static const struct usb_string_descriptor lang_desc     = USB_ARRAY_DESC(USB_LANGID_ENG_US);
-static const struct usb_string_descriptor manuf_desc_en = USB_STRING_DESC("Open source USB stack for STM32");
-static const struct usb_string_descriptor prod_desc_en  = USB_STRING_DESC("CDC Loopback demo");
+static const struct usb_string_descriptor manuf_desc_en = USB_STRING_DESC("Geodimeter Iface");
+static const struct usb_string_descriptor prod_desc_en  = USB_STRING_DESC("Geodimeter Iface");
 static const struct usb_string_descriptor *const dtable[] = {
     &lang_desc,
     &manuf_desc_en,
