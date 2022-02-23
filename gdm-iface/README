@@ -33,7 +33,20 @@ make bin
 
 bin will be in the same output directory.
 
-interface how to:
+interface how to (new version):
+-----------------
+there is board design in the "board" directory. It contains eagle files and gerbers to mfg custom board.
+
+For this board you will need:
+1-2x level translators (transistor type)
+1x bluepill with original stm32f103
+1x dcdc converter
+1-2x db9 female angle connector
+some pinheaders + jumpers
+dc barrel connector
+
+
+interface how to (old version):
 -----------------
 
 for interface you need:
