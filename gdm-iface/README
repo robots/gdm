@@ -15,6 +15,19 @@ are 3 projects:
                 actually tested as stm32 is 3v3volt and original
                 mcu is 5v.
 
+Windows driver:
+-----------------
+Most recent version needs inf driver under windows as Iface presents itself as 2 serial ports:
+one is for interface itself
+one is for communication with station
+
+Both are named as such in windows, so you can easily recognize which is which.
+
+
+using built binary:
+-----------------
+Directory "binary" contains the latest binary firmware, so you dont need to compile it yourself.
+
 building sources:
 -----------------
 download recent gnuarm toolchain, install, put into PATH.
