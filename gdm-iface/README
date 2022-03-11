@@ -15,6 +15,10 @@ are 3 projects:
                 actually tested as stm32 is 3v3volt and original
                 mcu is 5v.
 
+- serial-sniffer - firmware that uses 2 separate serial port RX
+                   outputs data on USB serial port. Useful for
+                   rs232 traffic sniffing.
+
 Windows driver:
 -----------------
 Most recent version needs inf driver under windows as Iface presents itself as 2 serial ports:
