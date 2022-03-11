@@ -33,5 +33,5 @@ const struct gpio_init_table_t uart3_gpio[] = {
 	},
 };
 
-const int uart2_gpio_cnt = ARRAY_SIZE(uart1_gpio);
+const int uart1_gpio_cnt = ARRAY_SIZE(uart1_gpio);
 const int uart3_gpio_cnt = ARRAY_SIZE(uart3_gpio);
