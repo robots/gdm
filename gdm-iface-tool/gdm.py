@@ -298,8 +298,11 @@ class GDM:
             if d[0] in [self.TYPE_WHAT_1, self.TYPE_WHAT_2]:
                 continue
 
-            l = self.read_label(lab)
-            do[lab] = l
+            try:
+                l = self.read_label(lab)
+                do[lab] = l
+            except:
+                pass
 
         return do
 

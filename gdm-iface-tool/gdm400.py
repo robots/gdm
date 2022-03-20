@@ -205,7 +205,7 @@ class GDM400(gdm.GDM):
     def backup_label_names(self):
         addr = self.read_label(142)
         ln = self.read_mem(addr, 0x0000, self.label_name_size)
-        return ln
+        return (ln, )
 
     def load_texts(self, texts):
         if not len(texts) == 2:
@@ -227,6 +227,10 @@ class GDM400(gdm.GDM):
         addr1, seg1, addr2, seg2, size1, size2 = struct.unpack("HHHHHH", test_addresses)
 
         t1 = self.read_mem(addr1, seg1, size1)
+
+        if (size2 == 0):
+            return (t1, )
+
         t2 = self.read_mem(addr2, seg2, size2)
 
         return t1, t2

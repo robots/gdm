@@ -363,6 +363,13 @@ class InputThread(threading.Thread):
             for i, t in enumerate(servo):
                 with open("%s_%d" % (fname, i), 'wb') as fo:
                     fo.write(t)
+        elif cmd[0] == 'backup_label_names':
+            fname = cmd[1]
+            lbl = self.gdm.backup_label_names()
+            
+            for i, t in enumerate(lbl):
+                with open("%s_%d" % (fname, i), 'wb') as fo:
+                    fo.write(t)
 
         else:
             if not cmd[0] == '':
