@@ -162,7 +162,7 @@ class GDM:
             raw = from_bcd(data)
 
 #            print("lab", label, "decmials:", p, "data:", data.hex())
-            if p == 1:
+            if p == 1 or p == 0:
                 p = 4
             elif p == 2 or p == 3:
                 p = 3
