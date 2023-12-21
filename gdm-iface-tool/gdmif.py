@@ -7,11 +7,34 @@ import serial
 import crcmod
 import time
 
-def hexit( text ):
-    h = []
-    for c in text:
-        h.append( "%02X" % (ord(c)) )
-    return " ".join(h)
+class GDMIfSub:
+
+    def __init__(self, gdmif, if_idx):
+        self.gdmif = gdmif
+        self.if_idx = if_idx
+        self.pkt_handler = None
+
+        self.gdmif.register_sub(if_idx, self)
+
+    def set_mode(self, mode):
+        return self.gdmif.set_mode(self.if_idx, mode)
+
+    def set_timing(self, timeout, bitdelay, deb):
+        return self.gdmif.set_timing(self.if_idx, timeout, bitdelay, deb)
+
+    def send(self, label, buf):
+        return self.gdmif.send(self.if_idx, label, buf)
+
+    def recv(self):
+        return self.gdmif.recv(self.if_idx)
+
+    def register_pkt_handler(self, handler):
+        self.pkt_handler = handler
+
+    def process_pkt(self, buf):
+        print(f"{self.if_idx}: {repr(buf)}")
+        if self.pkt_handler is not None:
+            self.pkt_handler(buf)
 
 class GDMIf(threading.Thread):
 
@@ -29,6 +52,8 @@ class GDMIf(threading.Thread):
     CMD_SEND = 0x21
     CMD_RECV = 0x22
 
+    CMD_PKT = 0x70
+
     timeout = 1
 
     def __init__(self, serialport, debug = False):
@@ -41,15 +66,16 @@ class GDMIf(threading.Thread):
         self.cmd_semaphore = threading.Semaphore(0)
         self.cmd_sent = False 
 
-        #self.gdmif = GDMIf(self.send_cmd)
-
-        self.exit_cbs = []
+        self.subif = {}
 
         self.serial_hrd = struct.Struct("=BH")
 
         self.open_serial(serialport)
         self.workFlag = True
     
+    def register_sub(self, idx, obj):
+        self.subif[idx] = obj
+
     def stop(self):
         self.workFlag = False
 
@@ -68,11 +94,12 @@ class GDMIf(threading.Thread):
 
         hdr = self.serial.read(3)
         if not len(hdr) == 3:
-#            print("Timeout reading hdr")
+            print("Timeout reading hdr")
             return False
 #        print(repr(hdr))
         reccmd, reclen = self.serial_hrd.unpack(hdr)
         recdata = None
+#        print(reccmd, reclen)
         if reclen == 0xffff:
 #            print("Received NAK")
             recdata = False
@@ -84,9 +111,9 @@ class GDMIf(threading.Thread):
         else:
             recdat = self.serial.read(reclen)
             if len(recdat) < reclen:
-#                print("Timeout reading data")
+                print("Timeout reading data", len(recdat), reclen)
                 return False
-#            print("Received DATA: ", recdat.hex())
+#           print("Received DATA: ", recdat.hex())
             recdata = recdat
             crc_calc = self.crcfn(hdr + recdata)
 
@@ -98,7 +125,7 @@ class GDMIf(threading.Thread):
 
         #check crc;
         if not crc == crc_calc:
-            print("crc check errro %08x %08x" % (crc, crc_calc))
+#            print("crc check errro %08x %08x" % (crc, crc_calc))
             return False
 
         if not reccmd & 0x80 == 0x80:
@@ -110,21 +137,20 @@ class GDMIf(threading.Thread):
 
     def run(self):
         while self.workFlag:
-#            sockets = [self.serial.fileno()]
-#            can_read, _, _ = select.select(sockets, [], [], 0.01)
-
-#            if self.serial.fileno() in can_read:
-#            print(time.time(), "check serial")
             if self.serial.inWaiting():
 #                print("check serial")
                 data = self.process_serial()
                 if self.debug:
                     print("debug %s %s" % (self.name, data))
 
-                #print(data)
+#                print(data)
                 if data is False:
                     continue
 
+                if data['cmd'] == GDMIf.CMD_PKT:
+                   iface = data['data'][0]
+                   if iface in self.subif:
+                       self.subif[iface].process_pkt(data['data'][1:])
                 if data['cmd'] == GDMIf.CMD_SNIFPKT:
                     my_print ("sniff pkt")
                 elif data['cmd'] == GDMIf.CMD_DEBUG:
@@ -142,16 +168,8 @@ class GDMIf(threading.Thread):
 #                else:
 #                    print("ssaass", data['cmd'])
 
-#            if not self.q.empty():
-#                data = self.q.get(True, 0.1)
-#                if self.debug:
-#                    print("debugq %s %s" % (self.name, data))
-#
-#                if data['data'] == 'exit':
-#                    for cb in self.exit_cbs:
-#                        cb()
-
-            time.sleep(0.001)
+            else:
+                time.sleep(0.001)
 
 
     def _send_cmd(self, cmd, data = b'', send=True):
@@ -248,12 +266,17 @@ class GDMIf(threading.Thread):
 
         r, = struct.unpack("<I", ret)
         return r
+ 
+    # pwm 2000-4000 = 1ms - 2ms
+    def pwm(self, ch, pwm):
+        data = struct.pack("<BH", ch, pwm)
+        return self._transfer(self.CMD_PWM, data)
 
-    def set_timing(self, timeout, bitdelay, deb):
+    def set_timing(self, ifaceidx, timeout, bitdelay, deb):
         if timeout <= bitdelay * deb:
             raise Exception("timeout <= bitdelay * deb")
 
-        data = struct.pack("<HHBBH", timeout, bitdelay, deb, 0, 0)
+        data = struct.pack("<BHHBBH", ifaceidx, timeout, bitdelay, deb, 0, 0)
 
         ret = self._transfer(self.CMD_TIMEOUT, data)
 
@@ -262,17 +285,12 @@ class GDMIf(threading.Thread):
 
         return ret
 
-    # pwm 2000-4000 = 1ms - 2ms
-    def pwm(self, ch, pwm):
-        data = struct.pack("<BH", ch, pwm)
-        return self._transfer(self.CMD_PWM, data)
-
-    def set_mode(self, mode):
-        data = struct.pack("<B", mode)
+    def set_mode(self, ifaceidx, mode):
+        data = struct.pack("<BB", ifaceidx, mode)
         return self._transfer(self.CMD_MODE, data)
 
-    def send(self, label, buf):
-        data = struct.pack("<B", label) + buf
+    def send(self, ifaceidx, label, buf):
+        data = struct.pack("<BB", ifaceidx, label) + buf
 
         if self.debug:
             print("send", data.hex())
@@ -288,8 +306,8 @@ class GDMIf(threading.Thread):
 
         return True
 
-    def recv(self):
-        dat = self._transfer(self.CMD_RECV)
+    def recv(self, ifaceidx):
+        dat = self._transfer(self.CMD_RECV, struct.pack("<B", ifaceidx))
 
         if isinstance(dat, bool):
             raise Exception("timeout receiving")

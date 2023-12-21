@@ -12,7 +12,7 @@ import traceback
 import socket
 import math
 
-from gdmif import GDMIf
+from gdmif import GDMIf, GDMIfSub
 from gdm import GDM
 from gdm220 import GDM220
 from gdm400 import GDM400
@@ -53,7 +53,6 @@ class InputThread(threading.Thread):
         self.q = q
         self.name = name
         self.threadID = threadID
-        self.gdmif = gdmif
         self.debug = debug
 
         self.histfile = histfile
@@ -67,7 +66,11 @@ class InputThread(threading.Thread):
         self.in_macro = False
         self.cur_macro = None
 
-        self.gdm = GDM(gdmif)
+        self.gdmif = gdmif
+        self.gdmif0 = GDMIfSub(self.gdmif, 0)
+        self.gdmif1 = GDMIfSub(self.gdmif, 1)
+
+        self.gdm = GDM(self.gdmif0)
         try:
             readline.read_history_file(self.histfile)
         except IOError:
@@ -148,7 +151,7 @@ class InputThread(threading.Thread):
             if not model in gdms.keys():
                 raise Exception("no such model")
 
-            self.gdm = gdms[model](self.gdmif)
+            self.gdm = gdms[model](self.gdmif0)
 #gdmif commands
         elif cmd[0] == 'id':
             print("ID '%s'" % (self.gdmif.get_id()))
@@ -160,7 +163,9 @@ class InputThread(threading.Thread):
                 print("Ping Not ok")
         elif cmd[0] == 'selftest':
             ret = self.gdmif.selftest()
-            if not ret:
+            if ret is False:
+                print("selftest timeout")
+            elif ret == 0:
                 print("selftest ok")
             else:
                 print("bad %04x" % ret)
@@ -173,13 +178,16 @@ class InputThread(threading.Thread):
             timeout = int(cmd[1])
             bitdelay = int(cmd[2])
             deb = int(cmd[3])
-            ret = self.gdmif.set_timing(timeout, bitdelay, deb)
+            ret = self.gdmif0.set_timing(timeout, bitdelay, deb)
             if ret:
                 print("ok")
             else:
-                print("bad")
+                print("bad - set_timing")
         elif cmd[0] == 'recv':
-            ret = self.gdmif.recv()
+            if len(cmd) < 1:
+                raise Exception("recv")
+
+            ret = self.gdmif0.recv()
             if ret[0] == 0:
                 print("ok, lab: %d data: %s" % (ret[1], ret[2].hex()))
             else:
@@ -190,7 +198,27 @@ class InputThread(threading.Thread):
             lab = int(cmd[1])
             data = eval(cmd[2])
 
-            ret = self.gdmif.send(lab, data)
+            ret = self.gdmif0.send(lab, data)
+            if ret == True:
+                print("ok")
+            else:
+                print("bad %04x" % ret)
+        elif cmd[0] == 'recv1':
+            if len(cmd) < 1:
+                raise Exception("recv")
+
+            ret = self.gdmif1.recv()
+            if ret[0] == 0:
+                print("ok, lab: %d data: %s" % (ret[1], ret[2].hex()))
+            else:
+                print("bad %04x" % ret[0])
+        elif cmd[0] == 'send1':
+            if len(cmd) < 3:
+                raise Exception("send label data")
+            lab = int(cmd[1])
+            data = eval(cmd[2])
+
+            ret = self.gdmif1.send(lab, data)
             if ret == True:
                 print("ok")
             else:
@@ -297,6 +325,15 @@ class InputThread(threading.Thread):
 
             self.gdm.load_angle_coefs_text(a1file, a2file)
 
+        elif cmd[0] == 'gdm_load_servo':
+            s1file = cmd[1]
+            s2file = cmd[2]
+            with open(s1file, 'rb') as fin:
+                s1coef = fin.read()
+            with open(s2file, 'rb') as fin:
+                s2coef = fin.read()
+
+            self.gdm.load_servo_coefs(s1coef, s2coef)
         elif cmd[0] == 'gdm_load_label_names':
             labfile = cmd[1]
             with open(labfile, 'rb') as fin:
