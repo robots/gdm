@@ -68,24 +68,22 @@ interface how to (old version):
 
 for interface you need:
 1x bluepill - original stm32f103 based! not chineese clone
-1x TXS0108 breakout board - or similar, need 3 channels, but 8channels are available for fewer $
+1x transistor level translator - do not use bidir TXSxxxx these will self-oscillate on longer wires 
 1x 10uF capacitor (>6.3V)
 1x DB9 connector
 cables
 
 5V and 3v3 from bluepill to translator board
 10uF capacitor on 5V side of translator board
-OE pin to 3v3
 
-pin PB12 (IO1) to txs0108 channel x VCCa side
-pin PB13 (IO2) to txs0108 channel y VCCa side
-pin PB14 (IO3) to txs0108 channel y VCCa side
+pin PB12 (IO1) to level translator channel x VCCa side
+pin PB13 (IO2) to level translator channel y VCCa side
+pin PB14 (IO3) to level translator channel z VCCa side
 
 DB9 pin 7  to IO1 VCCb side
 DB9 pin 1  to IO2 VCCb side
 DB9 pin 5  to IO3 VCCb side
-DB9 pin 4  gnd on translator board
+DB9 pin 4  gnd
 DB9 pin 6  power +
 DB9 pin 9  power -
 
-Keep cables short < 20cm

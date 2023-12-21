@@ -86,7 +86,7 @@ SRC += ../common/gpio.c
 SRC += ../common/led.c
 SRC += ../common/systime.c
 SRC += ../common/timer.c
-#SRC += ../common/uart1.c
+SRC += ../common/uart1.c
 SRC += ../common/uart3.c
 
 SRC += $(BSP)/bsp_led.c

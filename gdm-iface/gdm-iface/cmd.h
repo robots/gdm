@@ -18,6 +18,9 @@ enum {
 	CMD_MODE = 0x20,
 	CMD_SEND,
 	CMD_RECV,
+
+
+	CMD_PKT = 0x70,
 };
 
 struct cmd_pkt_t {

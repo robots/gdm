@@ -5,6 +5,12 @@
 
 typedef void(*exti_fnc_t)(void);
 
+enum {
+	EXTI_Trigger_Rising_Falling,
+	EXTI_Trigger_Rising,
+	EXTI_Trigger_Falling,
+};
+
 #ifndef EXTI_PortSourceGPIOA
 #define EXTI_PortSourceGPIOA       GPIO_PortSourceGPIOA
 #define EXTI_PortSourceGPIOB       GPIO_PortSourceGPIOB

@@ -33,6 +33,8 @@ int main(void)
 	RCC->APB2ENR |= RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPBEN | RCC_APB2ENR_IOPCEN | RCC_APB2ENR_AFIOEN;
 	AFIO->MAPR |= (0x02 << 24); // only swj
 
+	delay_init();
+
 	gpio_init(main_gpio, ARRAY_SIZE(main_gpio));
 
 	systime_init();

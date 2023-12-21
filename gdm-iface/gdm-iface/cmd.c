@@ -41,7 +41,6 @@ static int cmd_handle_mode(void);
 static int cmd_handle_send(void);
 static int cmd_handle_recv(void);
 
-
 struct cmd_pkt_t cmd_out_pkt;
 struct cmd_pkt_t cmd_in_pkt;
 
@@ -59,13 +58,15 @@ struct {
 	{ CMD_ID,                   0, cmd_handle_id },
 	{ CMD_PING,                -1, cmd_handle_ping },
 	{ CMD_SELFTEST,             0, cmd_handle_selftest },
-	{ CMD_TIMEOUT,              8, cmd_handle_timeout },
+	{ CMD_TIMEOUT,              9, cmd_handle_timeout },
 	{ CMD_RESET,                0, cmd_handle_reset },
 	{ CMD_PWM,                  3, cmd_handle_pwm },
-	{ CMD_MODE,                 1, cmd_handle_mode },
+	{ CMD_MODE,                 2, cmd_handle_mode },
 	{ CMD_SEND,                -1, cmd_handle_send },
-	{ CMD_RECV,                 0, cmd_handle_recv },
+	{ CMD_RECV,                 1, cmd_handle_recv },
 };
+
+static void gdm_rx_cb(uint8_t iface, uint8_t *data, uint16_t datalen);
 
 void cmd_periodic(void)
 {
@@ -114,6 +115,9 @@ void cmd_init(void)
 
 	pwm_init();
 	gdm_init();
+
+	gdm_set_rx_cb(&gdm_iface[0], gdm_rx_cb);
+	gdm_set_rx_cb(&gdm_iface[1], gdm_rx_cb);
 }
 
 void cmd_parse(uint8_t buf)
@@ -185,6 +189,35 @@ static void cmd_timer_handler(void)
 	cmd_in_state = CMD_IN_IDLE;
 }
 
+static void gdm_rx_cb(uint8_t iface, uint8_t *data, uint16_t datalen)
+{
+	uint32_t c;
+	uint8_t sof = CMD_SOF;
+	uint16_t len;
+
+	uint8_t cmd = CMD_PKT;
+	cmd |= 0x80;
+
+	len = 1+datalen; // iface + data
+
+	c = xcrc32((uint8_t *)&cmd, 1, 0xffffffff);
+	c = xcrc32((uint8_t *)&len, 2, c);
+	c = xcrc32((uint8_t *)&iface, 1, c);
+	c = xcrc32((uint8_t *)data, datalen, c);
+
+	c = __REV(c);
+
+	fifo_write_buf(&cmd_prio_fifo, (void *)&sof, 1);
+	fifo_write_buf(&cmd_prio_fifo, (void *)&cmd, 1);
+	fifo_write_buf(&cmd_prio_fifo, (void *)&len, 2);
+
+	fifo_write_buf(&cmd_prio_fifo, &iface, 1);
+	fifo_write_buf(&cmd_prio_fifo, data, datalen);
+
+	fifo_write_buf(&cmd_prio_fifo, (void *)&c, 4);
+}
+
+/*
 void cmd_queue(uint8_t cmd, uint8_t *data, uint16_t len)
 {
 	uint32_t c;
@@ -204,6 +237,7 @@ void cmd_queue(uint8_t cmd, uint8_t *data, uint16_t len)
 	fifo_write_buf(&cmd_prio_fifo, data, len);
 	fifo_write_buf(&cmd_prio_fifo, (void *)&c, 4);
 }
+*/
 
 void cmd_send(void)
 {
@@ -257,7 +291,7 @@ static int cmd_handle_id(void)
 	cmd_out_pkt.data[2] = 'M';
 	cmd_out_pkt.data[3] = 'I';
 	cmd_out_pkt.data[4] = 'f';
-	cmd_out_pkt.data[5] = '1';
+	cmd_out_pkt.data[5] = '2';
 	cmd_out_pkt.len = 6;
 
 	return 1;
@@ -279,7 +313,14 @@ static int cmd_handle_selftest(void)
 	cmd_out_pkt.len = 4;
 	cmd_out_pkt.cmd = CMD_SELFTEST;
 
-	ret = gdm_selftest();
+	ret = gdm_selftest(&gdm_iface[0]);
+
+	if (ret == 0) {
+		ret = gdm_selftest(&gdm_iface[1]);
+		if (ret != 0) {
+			ret = 0x1000 + ret;
+		}
+	}
 
 	memcpy((void *)&cmd_out_pkt.data[0], (void *)&ret, 4);
 
@@ -300,15 +341,23 @@ static int cmd_handle_reset(void)
 
 static int cmd_handle_timeout(void)
 {
+	struct gdm_iface_t *iface;
+
 	uint16_t timeout;
 	uint16_t bitdly;
 	uint8_t deb;
 
-	memcpy(&timeout, &cmd_in_pkt.data[0], 2);
-	memcpy(&bitdly, &cmd_in_pkt.data[2], 2);
-	memcpy(&deb, &cmd_in_pkt.data[4], 1);
+	if (cmd_in_pkt.data[0] == 0) {
+		iface = &gdm_iface[0];
+	} else {
+		iface = &gdm_iface[1];
+	}
 
-	gdm_set_params(timeout, bitdly, deb);
+	memcpy(&timeout, &cmd_in_pkt.data[1], 2);
+	memcpy(&bitdly, &cmd_in_pkt.data[3], 2);
+	memcpy(&deb, &cmd_in_pkt.data[5], 1);
+
+	gdm_set_params(iface, timeout, bitdly, deb);
 
 	return 2;
 }
@@ -328,22 +377,31 @@ static int cmd_handle_pwm(void)
 
 static int cmd_handle_mode(void)
 {
-	gdm_set_mode(cmd_in_pkt.data[0]);
+	struct gdm_iface_t *iface;
+
+	if (cmd_in_pkt.data[0] == 0) {
+		iface = &gdm_iface[0];
+	} else {
+		iface = &gdm_iface[1];
+	}
+
+	gdm_set_mode(iface, cmd_in_pkt.data[1]);
 	return 1;
 }
 
 static int cmd_handle_send(void)
 {
-	uint8_t label;
-	uint8_t l;
-	uint8_t *dat;
 	int ret;
+	uint8_t x = cmd_in_pkt.data[0];
+	if (x > ARRAY_SIZE(gdm_iface)) x = 0;
+	
+	struct gdm_packet_t *pkt = &gdm_iface[x].tx_pkt;
 
-	label = cmd_in_pkt.data[0];
-	l = cmd_in_pkt.len - 1;
-	dat = &cmd_in_pkt.data[1];
+	pkt->label = cmd_in_pkt.data[1];
+	pkt->len = cmd_in_pkt.len - 2;
+	memcpy(pkt->data, &cmd_in_pkt.data[2], pkt->len);
 
-	ret = gdm_send_pkt(label, dat, l); 
+	ret = gdm_send_pkt(&gdm_iface[x], pkt); 
 
 	cmd_out_pkt.cmd = CMD_SEND;
 	cmd_out_pkt.len = 4;
@@ -355,20 +413,21 @@ static int cmd_handle_send(void)
 
 static int cmd_handle_recv(void)
 {
-	uint8_t label;
-	uint8_t l;
-	uint8_t *dat;
 	int ret;
+	uint8_t x = cmd_in_pkt.data[0];
+	if (x > ARRAY_SIZE(gdm_iface)) x = 0;
 
-	l = CMD_BUF_SIZE-5;
-	dat = &cmd_out_pkt.data[5];
+	struct gdm_packet_t *pkt = &gdm_iface[x].rx_pkt;
+	
+	pkt->len = CMD_BUF_SIZE-5;
 
-	ret = gdm_recv_pkt(&label, dat, &l); 
+	ret = gdm_recv_pkt(&gdm_iface[x], pkt); 
 
 	cmd_out_pkt.cmd = CMD_RECV;
-	cmd_out_pkt.len = l+5;
+	cmd_out_pkt.len = pkt->len + 5;
 	memcpy(&cmd_out_pkt.data[0], &ret, 4);
-	cmd_out_pkt.data[4] = label;
+	cmd_out_pkt.data[4] = pkt->label;
+	memcpy(&cmd_out_pkt.data[5], pkt->data, pkt->len);
 
 	return 1;
 }
