@@ -170,7 +170,7 @@ class GDM:
                     raw = int(raw / 10)
             else:
                 pass
-#           print("decoded bcd:", raw)
+#            print("decoded bcd:", raw)
 
             return raw / (10**p)
 

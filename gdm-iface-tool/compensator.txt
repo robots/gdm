@@ -4,7 +4,7 @@
 labels 104, 106, 109, 107, 108
 
 104 and 106 are gains of axis 1 and 2
-107 and 107 are offsets - calculated during "comp init"
+107 and 108 are offsets - calculated during "comp init"
 
 109 is cross parameter (rotation of compensator ?)
 

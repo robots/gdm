@@ -195,14 +195,15 @@ class GDM4000(gdm400.GDM400):
         246: (5, '', None, None),
         247: (5, '', None, None),
         248: (5, '', None, None),
-        250: (6, '', None, None),
+        250: (6, 'devcom_trace', None, None),
         251: (7, 'comm', None, None),
         252: (1, 'comm', None, None),
         253: (6, 'comm', None, None),
         254: (4, 'comm', None, None),
     }
 
-    angle_coef_size = 160
+    angle_coef_1 = 22 * 4 # in 4byte format
+    angle_coef_2 = 3 * 4
 
     def load_defaults(self):
         super().load_defaults()

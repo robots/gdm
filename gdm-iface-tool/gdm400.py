@@ -5,10 +5,8 @@ import numpy as np
 
 from io import StringIO
 from gdm_num import gdm_num
-#todo:
-# make some nice structure for angles
 
-
+# 542-17
 
 class GDM400(gdm.GDM):
     labels = {
@@ -188,7 +186,9 @@ class GDM400(gdm.GDM):
         254: (4, 'comm', None, None),
     }
 
-    angle_coef_size = 240
+    angle_coef_1 = 22 * 6 # 22 coefficients for each angular sensor, in 6byte format
+    angle_coef_2 = 2 * 6 # 3 coefs per calibration line (normally 6 or 9 calibration lines)
+
     label_name_size = 600
     texts_size = 600
     
@@ -225,6 +225,7 @@ class GDM400(gdm.GDM):
         addr = self.read_label(144)
         test_addresses = self.read_mem(addr, 0x0000, 6*2)
         addr1, seg1, addr2, seg2, size1, size2 = struct.unpack("HHHHHH", test_addresses)
+        print(addr1, seg1, addr2, seg2, size1, size2)
 
         t1 = self.read_mem(addr1, seg1, size1)
 
@@ -256,6 +257,7 @@ class GDM400(gdm.GDM):
     def load_angle_coefs_text(self, file1, file2):
 
         b = []
+        counts = []
 
         for fil in [file1, file2]:
             cal = []
@@ -300,12 +302,16 @@ class GDM400(gdm.GDM):
 #                print(row[2])
                 a+= gdm_num.to_6num(row[2])
             b.append(a)
+            counts.append(len(cal[2]))
 
-        self.load_angle_coefs(b[0], b[1])
+        self.load_angle_coefs(b[0], b[1], counts[0], counts[1])
         
     def load_angle_coefs(self, angle0_bin, angle1_bin, angle0_count=6, angle1_count=6):
-        if len(angle0_bin) != self.angle_coef_size or len(angle1_bin) != self.angle_coef_size:
-            raise Exception("coef len needs to be", self.angle_coef_size, " got:", len(angle0_bin), len(angle1_bin))
+        expbin0 = self.angle_coef_1 + self.angle_coef_2 * angle0_count 
+        expbin1 = self.angle_coef_1 + self.angle_coef_2 * angle1_count 
+
+        if len(angle0_bin) != expbin0 or len(angle1_bin) != expbin1:
+            raise Exception("coef len needs to be", expbin0, expbin1, " got:", len(angle0_bin), len(angle1_bin))
 
         s = 0
         for i in range(int(len(angle0_bin)/2)):
@@ -330,12 +336,19 @@ class GDM400(gdm.GDM):
         self.write_label(136, s)
 
     def backup_angle_coefs(self):
-        addr0 = self.read_label(145)
-        a0 = self.read_mem(addr0, 0x0000, self.angle_coef_size)
-        addr1 = self.read_label(147)
-        a1 = self.read_mem(addr1, 0x0000, self.angle_coef_size)
-        return a0, a1
+        angle0_count = self.read_label(146)
+        angle1_count = self.read_label(147)
 
+        if not angle0_count in [9,6] or not angle1_count in [9,6]:
+            raise Exception("Wrong angle ceff count in station a0 = %d a1 = %d" % (angle0_count, angle1_count))
+
+        addr0 = self.read_label(145)
+        a0 = self.read_mem(addr0, 0x0000, self.angle_coef_1 + self.angle_coef_2 * angle0_count)
+
+        addr1 = self.read_label(147)
+        a1 = self.read_mem(addr1, 0x0000, self.angle_coef_1 + self.angle_coef_2 * angle1_count)
+
+        return a0, a1
 
     # valid: 100, 101, 200, 300, 400, 500, 600, 601, 700
     # 101 - all programs?
