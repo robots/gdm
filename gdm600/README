@@ -30,13 +30,15 @@ Some stations don't support dumping of firmware through serial port from firmwar
 
 Pencil trick:
 
-During booting rom checks checksum of the firmware in ram, if the check is ok it executes the firmwar. If check is bad, loader code is entered. This code lets you update content of ram.
+During booting rom checks checksum of the firmware in ram, if the check is ok it executes the firmware. If check is bad, loader code is entered. This code lets you update content of ram.
 
-You need to find 74HC573 chip on the board. During boot touch inputs of this chip using very blunt pencil - short data pins. This will cause the checksum to be temporarily corrupt and boot code will enter loader.
+You need to find 74HC573 chip on the board. During boot touch inputs (D0-D7) of this chip using very blunt pencil - short data pins. This will cause the checksum to be temporarily corrupt and boot code will enter loader. Before the first beep but after powerup has started seems to be the right time to short the pins. The control panel may need to be disconnected for this to work.
+
+An alternative may exist on some firmware/boards. Holding TX of the 87C51 low tells the loader to enter console mode. If there is an unpopulated 4 pin header and pin 4 is connected to TX, you can short that pin to any ground while powering up the instrument.
 
 Loader has several commands - few very dangerous at this point. OV* is the most interesting one. Start terminal emulator (realterm, teraterm) enable output capture and execute OV* command.
 
 
-dump2srec.py will help you to convert this dump into file that can be loaded by upload.py
+dump2srec.py will help you to convert this dump into file that can be loaded by upload.py. srec2binarysplit.py can split a dump in to the various banks as files. Be sure to read the code/comments to select the right things for your specific unit.
 
 It has not been tested on this type of stations.

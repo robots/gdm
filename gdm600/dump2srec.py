@@ -14,9 +14,9 @@ with open(sys.argv[1], "r") as fin:
             break
 
         if "," not in l:
-            continue
-
-        ts, dat = l.split(",")
+            dat = l
+        else:
+            ts, dat = l.split(",")
 
         if "Bank #" in dat:
             bank+=1
@@ -105,7 +105,7 @@ def srec(t, a, d = None):
 #    with open("bank%d.bin" % i, "wb") as fout:
 #        fout.write(banks[i])
 
-with open("fw.s", "wt") as fout:
+with open("fw.s", "wt", newline="\n") as fout:
     for i in range(0x20, 0x8000, 16):
         data = mem_main[i:i+16]
         if sum(data) == 0:
@@ -113,7 +113,7 @@ with open("fw.s", "wt") as fout:
         s = srec(1, i, data)
 #        print("%x" % i, s)
         fout.write(s)
-        fout.write('\r\n')
+        fout.write('\n')
 
     for b in range(1,8):
         for i in range(0, 0x8000, 16):
@@ -124,10 +124,10 @@ with open("fw.s", "wt") as fout:
             s = srec(2, addr, data)
 #            print("%x" % addr, s)
             fout.write(s)
-            fout.write('\r\n')
+            fout.write('\n')
 
     s = srec(9, 0)
     print("%X" % addr, s)
     fout.write(s)
-    fout.write('\r\n')
+    fout.write('\n')
 

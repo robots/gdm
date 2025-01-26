@@ -53,9 +53,11 @@ with open(sys.argv[1], "rt") as fin:
 
 with open("mainmem.bin", "wb") as fout:
     fout.write(mem_main)
+#    fout.write(mem_main[0x2000:]) # Dump started here for at least one unit
 
 with open("maincode.bin", "wb") as fout:
     fout.write(mem_main[0x2000:])
+#    fout.write(mem_main[0x4000:]) # For 87C51 with 4kB on board ROM
 
 for i in range(1,8):
     with open("bank%d.bin" % i, "wb") as fout:
