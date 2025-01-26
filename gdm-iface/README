@@ -7,6 +7,11 @@ are 3 projects:
 - gdm-iface - interface to communicate with 400/500/4400 series
               geodimeter stations
 
+- gdm-iface-arduino - version of gdm-iface for Arduino. This is
+              hacky, isn't reusing libraries from gdm-iface, and
+              doesn't have the full feature set yet.
+              Use gdm-iface if you can.
+
 - gdm-fakeedm - fake edm for 400/500 station - my broke during
               R&D and this was replacement. It was tested
               with 400 station. Returns fake 1234.000m distance
@@ -30,7 +35,7 @@ Both are named as such in windows, so you can easily recognize which is which.
 
 using built binary:
 -----------------
-Directory "binary" contains the latest binary firmware, so you dont need to compile it yourself.
+Directory "binary" contains the latest binary firmware, so you don't need to compile it yourself.
 
 building sources:
 -----------------
@@ -67,7 +72,7 @@ interface how to (old version):
 -----------------
 
 for interface you need:
-1x bluepill - original stm32f103 based! not chineese clone
+1x bluepill - original stm32f103 based! not chinese clone
 1x transistor level translator - do not use bidir TXSxxxx these will self-oscillate on longer wires 
 1x 10uF capacitor (>6.3V)
 1x DB9 connector
@@ -86,4 +91,17 @@ DB9 pin 5  to IO3 VCCb side
 DB9 pin 4  gnd
 DB9 pin 6  power +
 DB9 pin 9  power -
+
+GDM Internal Bus Description
+The GDM internal communication bus consists of three lines: GDM_DAT, GDM_ACK, and GDM_CLK. These lines are all open drain, pulled high by the design of the microcontrollers.
+
+Communication is done with packets of the following structure:
+1 byte Command
+1 byte Length
+Length bytes Data
+3 bit Ack sequence after every Data byte
+
+To send a bit, the sender sets GDM_DAT to the bit value and then pulls GDM_CLK low to notify the receiver of available data. When the receiver latches this bit, it pulls GDM_ACK low to notify the sender that the bit has been read. The sender then brings GDM_CLK and GDM_DAT back to idle (high). The sender waits for the receiver to bring GDM_ACK idle (high) again before sending any additional bits.
+
+To send a byte, the above is done sequentially.
 
