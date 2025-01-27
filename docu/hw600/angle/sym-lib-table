@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "Angle Processor Board")(type "KiCad")(uri "${KIPRJMOD}/Angle Processor Board.kicad_sym")(options "")(descr ""))
+)
